@@ -3,14 +3,11 @@ mod consts;
 use std::process::{Output, Command, Stdio};
 use crate::App;
 use std::collections::HashMap;
-use crate::common::consts::{WINDOWS_TYPE, MACOS_TYPE, ERROR_COMMAND_OUTPUT_PANIC, WINDOWS_KEY_STR};
-
-// pub const APPLICATIONS_FOLDERS: [&'static str; 1] = [
-//     "/Applications",
-// ];
+use crate::common::consts::{WINDOWS_TYPE, MACOS_TYPE, ERROR_COMMAND_OUTPUT_PANIC, WINDOWS_KEY_STR, ERROR_CHECK_OS, ERROR_CHECK_FOLDER_NOT_EXIST};
+use std::path::Path;
 
 pub const APPLICATIONS_FOLDERS: [&'static str; 1] = [
-    "E:/Softwares",
+    "/Applications",
 ];
 
 pub fn determine_which_os() -> u8 {
@@ -23,7 +20,15 @@ pub fn determine_which_os() -> u8 {
     os_type
 }
 
-pub fn do_ls(app: &App, workdir: &str) -> Result<Output, ()> {
+pub fn check_folder_exists(folder: &str) -> bool {
+    Path::new(folder).is_dir()
+}
+
+pub fn do_ls(app: &App, workdir: &str) -> Result<Output, &'static str> {
+    if check_folder_exists(workdir) == false {
+        return Err(ERROR_CHECK_FOLDER_NOT_EXIST);
+    }
+
     return match app.os_type {
         WINDOWS_TYPE => {
             let mut list_dir = Command::new("cmd");
@@ -38,7 +43,7 @@ pub fn do_ls(app: &App, workdir: &str) -> Result<Output, ()> {
             Ok(output)
         }
         _ => {
-            Err(())
+            Err(ERROR_CHECK_OS)
         }
     };
 }
@@ -54,24 +59,32 @@ pub fn get_apps(app: &App) -> Vec<HashMap<&'static str, Vec<String>>> {
     let mut index = 0;
     loop {
         let current_folder = apps_folders[index];
-        let ls_output = do_ls(&app, current_folder).unwrap();
+        let ls_output = do_ls(&app, current_folder);
+
         match ls_output {
-            Output { status, stderr, stdout } => {
-                if status.success() {
-                    let buffer = stdout.to_vec();
-                    let buffer_string = String::from_utf8(buffer).unwrap();
+            Ok(ls_output_unwrap) => {
+                match ls_output_unwrap {
+                    Output { status, stderr, stdout } => {
+                        if status.success() {
+                            let buffer = stdout.to_vec();
+                            let buffer_string = String::from_utf8(buffer).unwrap();
 
-                    let apps_str_vec: Vec<String> = buffer_string.lines().map(|s| s.to_string()).collect();
+                            let apps_str_vec: Vec<String> = buffer_string.lines().map(|s| s.to_string()).collect();
 
-                    let mut list = HashMap::new();
-                    list.insert(current_folder, apps_str_vec);
-                    apps_list.push(list);
-                } else {
-                    let buffer = stderr.to_vec();
-                    let buffer_string = String::from_utf8(buffer).unwrap();
+                            let mut list = HashMap::new();
+                            list.insert(current_folder, apps_str_vec);
+                            apps_list.push(list);
+                        } else {
+                            let buffer = stderr.to_vec();
+                            let buffer_string = String::from_utf8(buffer).unwrap();
 
-                    panic!("{} - {:?}", ERROR_COMMAND_OUTPUT_PANIC, buffer_string)
+                            panic!("{} - {:?}", ERROR_COMMAND_OUTPUT_PANIC, buffer_string)
+                        }
+                    }
                 }
+            }
+            Err(ls_output_unwrap) => {
+                panic!("{}", ls_output_unwrap);
             }
         }
 
