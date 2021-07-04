@@ -1,0 +1,22 @@
+{
+  "name": "muzei",
+  "version": "1.0.0",
+  "description": "muzei project",
+  "main": "index.js",
+  "scripts": {
+    "tauri": "tauri"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/loicngr/muzei.git"
+  },
+  "author": "loicnogier@ik.me",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/loicngr/muzei/issues"
+  },
+  "homepage": "https://github.com/loicngr/muzei#readme",
+  "devDependencies": {
+    "@tauri-apps/cli": "^1.0.0-beta.5"
+  }
+}
