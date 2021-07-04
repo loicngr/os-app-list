@@ -1,14 +1,10 @@
-mod consts;
+pub(crate) mod consts;
 
 use std::process::{Output, Command, Stdio};
 use crate::App;
 use std::collections::HashMap;
 use crate::common::consts::{WINDOWS_TYPE, MACOS_TYPE, ERROR_COMMAND_OUTPUT_PANIC, WINDOWS_KEY_STR, ERROR_CHECK_OS, ERROR_CHECK_FOLDER_NOT_EXIST};
 use std::path::Path;
-
-pub const APPLICATIONS_FOLDERS: [&'static str; 1] = [
-    "/Applications",
-];
 
 pub fn determine_which_os() -> u8 {
     let os_name = std::env::consts::OS;
@@ -48,12 +44,8 @@ pub fn do_ls(app: &App, workdir: &str) -> Result<Output, &'static str> {
     };
 }
 
-pub fn get_apps_folders() -> [&'static str; 1] {
-    APPLICATIONS_FOLDERS.clone()
-}
-
 pub fn get_apps(app: &App) -> Vec<HashMap<&'static str, Vec<String>>> {
-    let apps_folders = get_apps_folders();
+    let apps_folders = app.state.get_applications_folders();
     let mut apps_list = Vec::new();
 
     let mut index = 0;
