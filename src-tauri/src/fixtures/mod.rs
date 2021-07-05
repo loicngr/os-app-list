@@ -1,5 +1,5 @@
 use crate::core::App;
-use crate::common::consts::{WINDOWS_TYPE, MACOS_TYPE};
+use crate::common::consts::{WINDOWS_TYPE, MACOS_TYPE, LINUX_TYPE};
 
 pub struct Applications {
     pub(crate) folders: Vec<&'static str>
@@ -10,6 +10,10 @@ impl Applications {
         if app.os_type == WINDOWS_TYPE {
             return Applications {
                 folders: vec!["E:/Softwares"]
+            };
+        } else if app.os_type == LINUX_TYPE {
+            return Applications {
+                folders: vec!["/tmp"]
             };
         }
 

@@ -1,5 +1,5 @@
 pub struct App {
-    pub(crate) os_type: u8,
+    pub(crate) os_type: u16,
     pub(crate) state: State
 }
 
@@ -23,7 +23,7 @@ impl State {
 }
 
 impl App {
-    pub(crate) fn new(which_os: u8, state: State) -> Self {
+    pub(crate) fn new(which_os: u16, state: State) -> Self {
         App { os_type: which_os, state }
     }
 }
