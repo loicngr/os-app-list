@@ -3,13 +3,15 @@ pub(crate) mod consts;
 use std::process::{Output, Command, Stdio};
 use crate::App;
 use std::collections::HashMap;
-use crate::common::consts::{WINDOWS_TYPE, MACOS_TYPE, ERROR_COMMAND_OUTPUT_PANIC, WINDOWS_KEY_STR, ERROR_CHECK_OS, ERROR_CHECK_FOLDER_NOT_EXIST};
+use crate::common::consts::{WINDOWS_TYPE, MACOS_TYPE, ERROR_COMMAND_OUTPUT_PANIC, WINDOWS_KEY_STR, ERROR_CHECK_OS, ERROR_CHECK_FOLDER_NOT_EXIST, LINUX_KEY_STR, LINUX_TYPE};
 use std::path::Path;
 
-pub fn determine_which_os() -> u8 {
+pub fn determine_which_os() -> u16 {
     let os_name = std::env::consts::OS;
     let os_type = if os_name == WINDOWS_KEY_STR {
         WINDOWS_TYPE
+    } else if os_name == LINUX_KEY_STR  {
+        LINUX_TYPE
     } else {
         MACOS_TYPE
     };
@@ -29,6 +31,12 @@ pub fn do_ls(app: &App, workdir: &str) -> Result<Output, &'static str> {
         WINDOWS_TYPE => {
             let mut list_dir = Command::new("cmd");
             list_dir.args(&["/C", format!("cd /d {} && dir /s/b *.exe", workdir).as_str()]);
+            let output = list_dir.output().expect("process failed to execute");
+            Ok(output)
+        },
+        LINUX_TYPE => {
+            let mut list_dir = Command::new("ls");
+            list_dir.current_dir(workdir);
             let output = list_dir.output().expect("process failed to execute");
             Ok(output)
         },
